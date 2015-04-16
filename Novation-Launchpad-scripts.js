@@ -18,9 +18,11 @@ NovationLaunchpad = {
 		this.callbacks = {};
 		this.feedbacks = {};
 		this.cache = [{}, {}, {}, {}];
+		this.feedback_cache = {};
 		this.toggle_cache = [{}, {}, {}, {}];
 		this.name2control = {};
 		this.control2name = {};
+		this.vumeters = [];
 
 		var self = NovationLaunchpad;
 		this.colors = self.colors();
@@ -37,6 +39,8 @@ NovationLaunchpad = {
 		this.gator = self.gator;
 		this.set_page = self.set_page;
 		this.vfader = self.vfader;
+		this.vumeter = self.vumeter;
+		this.vumeter_toggle = self.vumeter_toggle;
 
 		//
 		// map the midi config into something more useful
@@ -52,15 +56,23 @@ NovationLaunchpad = {
 			this.control2name["" + status + value] = name; // stringify it
 		}
 
+		//
+		// reset device, enable flashing colors
+		//
+
+		midi.sendShortMsg(0xb0, 0x0, 0x0);
+		midi.sendShortMsg(0xb0, 0x0, 0x28);
+
 		/////////////////////////////////////////////////////////////////////////
 		// button layout mapping starts here
 		/////////////////////////////////////////////////////////////////////////
 
 		// shift buttons
 
-		this.button("arm", "all", 0, 'hi_yellow', 'lo_yellow', '', '', function(g, n, v) { this.shift = v > 0 ? 1 : 0; });
-		this.button("solo", "all", 0, 'hi_yellow', 'lo_yellow', '', '', function(g, n, v) { this.shift2 = v > 0 ? 1 : 0; });
+		this.button("arm", "all", 1, 'hi_yellow', 'lo_yellow', '', '', function(g, n, v) { this.shift = v > 0 ? 1 : 0; });
+		this.button("solo", "all", 1, 'hi_yellow', 'lo_yellow', '', '', function(g, n, v) { this.shift2 = v > 0 ? 1 : 0; });
 		this.toggle("mixer", "all", 0, 'hi_red', 'lo_red', '', '', function(g, n, v) { this.set_page(v > 0 ? 2 : 1); });
+		this.toggle("vol", "all", 2, 'hi_red', 'lo_red', '', '', function(g, n, v) { this.vumeter_toggle(v); });
 
 		//// MAIN PAGE ////
 
@@ -157,7 +169,16 @@ NovationLaunchpad = {
 
 			this.button("6," + (offset + 2), "press", 1, 'hi_yellow', 'lo_yellow', group, "rate_perm_down_small");
 			this.button("6," + (offset + 3), "press", 1, 'hi_yellow', 'lo_yellow', group, "rate_perm_up_small");
+
+			// play button
 			this.toggle("7," + (offset + 0), "press", 1, 'hi_yellow', 'lo_red', group, "play");
+
+			// flash play button when near end of track
+			this.feedback(group, "playposition", function(self, g, e, value) {
+				if (value > 0.9 && engine.getValue(g, "play") > 0) {
+					self.send(g == "[Channel1]" ? "7,0" : "7,4", self.colors['flash_hi_red'], 1);
+				}
+			});
 			
 			// sync or move beatgrid when shift is pressed
 
@@ -176,12 +197,12 @@ NovationLaunchpad = {
 
 		//// MIXER PAGE ////
 
-		this.toggle("0,0", "all", 2, 'hi_red', 'lo_red', "[Channel1]", "filterHighKill");
-		this.toggle("0,1", "all", 2, 'hi_red', 'lo_red', "[Channel1]", "filterMidKill");
-		this.toggle("0,2", "all", 2, 'hi_red', 'lo_red', "[Channel1]", "filterLowKill");
-		this.toggle("0,5", "all", 2, 'hi_red', 'lo_red', "[Channel2]", "filterHighKill");
-		this.toggle("0,6", "all", 2, 'hi_red', 'lo_red', "[Channel2]", "filterMidKill");
-		this.toggle("0,7", "all", 2, 'hi_red', 'lo_red', "[Channel2]", "filterLowKill");
+		this.toggle("0,0", "all", 2, 'flash_hi_red', 'lo_red', "[Channel1]", "filterHighKill");
+		this.toggle("0,1", "all", 2, 'flash_hi_red', 'lo_red', "[Channel1]", "filterMidKill");
+		this.toggle("0,2", "all", 2, 'flash_hi_red', 'lo_red', "[Channel1]", "filterLowKill");
+		this.toggle("0,5", "all", 2, 'flash_hi_red', 'lo_red', "[Channel2]", "filterHighKill");
+		this.toggle("0,6", "all", 2, 'flash_hi_red', 'lo_red', "[Channel2]", "filterMidKill");
+		this.toggle("0,7", "all", 2, 'flash_hi_red', 'lo_red', "[Channel2]", "filterLowKill");
 
 		this.vfader(7, 0, 2, 7, 'hi_orange', 'lo_green', "[Channel1]", "filterLow");
 		this.vfader(7, 1, 2, 7, 'hi_orange', 'lo_green', "[Channel1]", "filterMid");
@@ -192,6 +213,8 @@ NovationLaunchpad = {
 
 		this.vfader(7, 3, 2, 8, 'hi_yellow', 'lo_red', "[Channel1]", "volume");
 		this.vfader(7, 4, 2, 8, 'hi_yellow', 'lo_red', "[Channel2]", "volume");
+		this.vumeter(7, 3, 2, 8, 'hi_yellow', 'lo_red', "[Channel1]", "VuMeter");
+		this.vumeter(7, 4, 2, 8, 'hi_yellow', 'lo_red', "[Channel2]", "VuMeter");
 
 		/////////////////////////////////////////////////////////////////////////
 		// button layout mapping ends here
@@ -308,6 +331,7 @@ NovationLaunchpad = {
 	//
 
 	feedbackData: function(v, g, e) {
+		this.feedback_cache[g + e] = v;
 		if (this.feedbacks[g + e] != undefined) {
 			for (func in this.feedbacks[g + e]) {
 				if (typeof(this.feedbacks[g + e][func]) == "function") {
@@ -466,6 +490,10 @@ NovationLaunchpad = {
 		});
 	},
 
+	//
+	// turn a column of pads into a virtual fader
+	//
+
 	vfader: function(y, x, page, nbtns, on_color, off_color, group, action) {
 		var incr = 1 / nbtns;
 
@@ -495,6 +523,59 @@ NovationLaunchpad = {
 	},
 
 	//
+	// turn a column of pads into a vumeter
+	//
+
+	vumeter: function(y, x, page, nbtns, on_color, off_color, group, action) {
+		var incr = 1 / nbtns;
+		this.vumeters.push([ y, x, page, nbtns, on_color, off_color, group, action ]);
+		this.feedback(group, action, function(self, g, e, value) { 
+			if (self.vumeter_shift > 0) {
+				for (btn=0; btn<nbtns; btn++) {
+					if (value > btn*incr) {
+						self.send((y-btn)+","+x, self.colors[on_color], page);
+					}
+					else {
+						self.send((y-btn)+","+x, self.colors[off_color], page);
+					}
+				}
+			}
+		});
+	},
+
+	vumeter_toggle: function(v) {
+		this.vumeter_shift = v > 0 ? 1 : 0;
+
+		//
+		// clear fader leds when enabling vumeter and set back the leds for the volume if disabling
+		//
+
+		for (i in this.vumeters) {
+
+			var value = this.vumeter_shift > 0 ? 0 : this.feedback_cache[ this.vumeters[i][6] + 'volume' ];
+
+			if (value != undefined) { 
+				var y = this.vumeters[i][0];
+				var x = this.vumeters[i][1];
+				var page = this.vumeters[i][2];
+				var nbtns = this.vumeters[i][3];
+				var on_color = this.vumeters[i][4];
+				var off_color = this.vumeters[i][5];
+				var incr = 1 / nbtns;
+
+				for (btn=0; btn<nbtns; btn++) {
+					if (value > btn*incr) {
+						this.send((y-btn)+","+x, this.colors[on_color], page);
+					}
+					else {
+						this.send((y-btn)+","+x, this.colors[off_color], page);
+					}
+				}
+			}
+		}
+	},
+
+	//
 	// get the last value sent to a launchpad led
 	//
 
@@ -515,6 +596,7 @@ NovationLaunchpad = {
 		if (page == this.page) return;
 
 		var updates = {};
+		var flashing = [];
 
 		for (i in this.cache[page]) {
 			if (this.cache[this.page][i] == undefined || this.cache[this.page][i] != this.cache[page][i]) {
@@ -531,11 +613,39 @@ NovationLaunchpad = {
 			}
 		}
 
+		// select buffer 1
+		midi.sendShortMsg(0xb0, 0x0, 0x31);
+
 		for (i in updates) {
 			if ((control = this.name2control[i]) != undefined) {
-				midi.sendShortMsg(control[0], control[1], updates[i]);
+
+				// 0 makes no sense - need 0x4 for black/off
+				if (updates[i] == 0) {
+					updates[i] = 0x4;
+				}
+
+				// send out non-flashing colors with copy bit removed
+				if (updates[i] & 0x4) {
+					midi.sendShortMsg(control[0], control[1], updates[i] & 0xfb);
+				}
+				else {
+					// send out off for this buffer for a flashing color
+					midi.sendShortMsg(control[0], control[1], 0x4);
+					flashing.push([ control[0], control[1], updates[i] ]);
+				}
 			}
 		}
+
+		// select buffer 0
+		midi.sendShortMsg(0xb0, 0x0, 0x34);
+
+		// send out any flashing updates
+		for (i in flashing) {
+			midi.sendShortMsg(flashing[i][0], flashing[i][1], flashing[i][2]);
+		}
+
+		// re-enable internal buffer cycling for flashing colors
+		midi.sendShortMsg(0xb0, 0x0, 0x28);
 
 		this.page = page;
 	},

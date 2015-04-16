@@ -4,6 +4,7 @@
 from http://www.mixxx.org/forums/viewtopic.php?f=7&t=3739
 created by zestoi
 published on Mon May 21, 2012 9:56 am
+updated on Tue May 22, 2012 5:06 am
 ```
 
 ## USAGE
@@ -64,5 +65,18 @@ col 6-8: deck B low/mid/high virtual eq faders with eq kills at the top
 
 ###(make sure you're not running Automap)
 
-## ATTACHMENTS
- NovationLaunchpad-20120521.zip
+## UPDATES on Tue May 22, 2012 5:06 am
+
+* enabled flashing colors
+* use flashing red for eq kills
+* play button flashes when the track is 90% the way thru
+* using internal buffering in the launchpad so that led updates between pages appear instant
+* shift/shift2 buttons (arm/solo) only now show up on the main page (page1)
+* a new toggle shift on the mixer page (page2) on the "vol" button turns the central two volume 'faders' into vumeters
+
+the code will support as many 'pages' with full led recall when switching between them. i only needed two for now, hence using the 'mixer' button as a toggle to change pages.
+
+there's also plenty of other buttons unmapped at the moment that could be used.
+
+## ATTACHMENTS (extracted to this repo)
+NovationLaunchpad-20120522.zip
