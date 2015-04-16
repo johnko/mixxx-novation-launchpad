@@ -18,8 +18,9 @@ bottom right is a shift button and above that a 2nd shift button
 
 the main grid is split into two halves, one for each deck. each half is mapped the same
 
+
 Row | Column 1 | 2           | 3                   | 4
-----|----------|-------------|---------------------|--
+----|----------|-------------|---------------------|---
 1   | quantize | keylock     | headphone cue       | load
 2   | flanger  | flanger     | gator               | gator
 3   | loops 1  | 1/2         | 1/4                 | 1/8
@@ -28,6 +29,7 @@ Row | Column 1 | 2           | 3                   | 4
 6   | hotcue 5 | 6           | 7                   | 8
 7   | cue      | reset pitch | pitch down          | pitch up
 8   | play     | sync        | pitchbend down      | pitchbend up
+
 
 ```
 shift + hotcue = delete hotcue
