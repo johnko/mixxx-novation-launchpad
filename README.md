@@ -7,6 +7,12 @@ published on Mon May 21, 2012 9:56 am
 updated on Tue May 22, 2012 5:06 am
 ```
 
+## INSTALL
+
+```
+cp Novation*Launchpad ~/Library/Application\ Support/Mixxx/controllers/
+```
+
 ## USAGE
 
 ```
