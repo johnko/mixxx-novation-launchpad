@@ -23,6 +23,7 @@ NovationLaunchpad = {
 		this.name2control = {};
 		this.control2name = {};
 		this.vumeters = [];
+		this.beatmeters = [];
 
 		var self = NovationLaunchpad;
 		self.instance = this; // needed for incoming data from the launchpad
@@ -83,8 +84,19 @@ NovationLaunchpad = {
 
 		this.playlist("up", 0, "SelectPrevTrack");
 		this.playlist("down", 0, "SelectNextTrack");
-		this.button("left", "press", 0, 'hi_yellow', 'lo_yellow', "[Playlist]", "SelectPrevPlaylist");
-		this.button("right", "press", 0, 'hi_yellow', 'lo_yellow', "[Playlist]", "SelectNextPlaylist");
+
+		// load song to decks
+
+		this.button("left", "press", 0, 'hi_orange', 'lo_orange', "[Channel1]", "LoadSelectedTrack");
+		this.button("right", "press", 0, 'hi_orange', 'lo_orange', "[Channel2]", "LoadSelectedTrack");
+
+		// crossfader
+		this.cfader(0, 0, 0, 8, 'lo_green', 'black', "[Master]", "crossfader");
+
+		// Beat meter
+
+		this.beatmeter(0, 3, 0, 1, 'hi_green'  , 'black', "[Channel1]", "VuMeter");
+		this.beatmeter(0, 4, 0, 1, 'hi_green'  , 'black', "[Channel2]", "VuMeter");
 
 		// deck mappings
 
@@ -94,31 +106,36 @@ NovationLaunchpad = {
 
 			// tracks
 
-			this.toggle("0," + (offset + 0), "all", 1, 'hi_red', 'lo_red', group, "quantize");
-			this.toggle("0," + (offset + 1), "all", 1, 'hi_red', 'lo_red', group, "keylock");
-			this.toggle("0," + (offset + 2), "all", 1, 'hi_red', 'lo_red', group, "pfl");
-			this.button("0," + (offset + 3), "all", 1, 'hi_yellow', 'lo_amber', group, "LoadSelectedTrack");
+			this.toggle("1," + (offset + 0), "all", 1, 'hi_red', 'lo_red', group, "quantize");
+			this.toggle("1," + (offset + 1), "all", 1, 'hi_red', 'lo_red', group, "keylock");
+			this.toggle("1," + (offset + 2), "all", 1, 'hi_orange', 'lo_orange', group, "pfl");
+			//this.button("0," + (offset + 3), "all", 1, 'hi_yellow', 'lo_amber', group, "LoadSelectedTrack");
 
 			// flanger
 
-			this.flanger("1," + (offset + 0), 1, group, 0.5, 1500000, 333);
-			this.flanger("1," + (offset + 1), 1, group, 1, 500000, 666);
-
-			// spinback effect
-
-			this.button("1," + (offset + 2), "all", 1, 'hi_red', 'lo_red', group, "", function(g, n, v) {
-				script.spinback(g, v > 0);
-			});
+			//this.flanger("1," + (offset + 0), 1, group, 0.5, 1500000, 333);
+			//this.flanger("1," + (offset + 1), 1, group, 1, 500000, 666);
 
 			// brake effect
 
-			this.button("1," + (offset + 3), "all", 1, 'hi_red', 'lo_red', group, "", function(g, n, v) {
-				script.brake(g, v > 0);
+			this.toggle("1," + (offset + 3), "all", 1, 'hi_red', 'lo_red', group, "", function(g, n, v) {
+				engine.brake(parseInt(g.substring(8,9)), v > 0);
 			});
 
-			// instant loops 
+			// instant loops
 
-			this.loop("2," + (offset + 0), 1, group, 1);
+			this.button("2," + (offset + 0), "press", 1, 'hi_yellow', 'lo_yellow', group, "", function(g, name, v) {
+				var size = 1;
+				var bpm = engine.getValue(g,"file_bpm");
+				var onebeatms = 60000/bpm;
+				engine.setValue(g, "beatloop_" + size + "_activate", 1);
+				engine.beginTimer( onebeatms/size*1.5, function(){
+					if (engine.getValue(g, "beatloop_" + size + "_enabled")) {
+						engine.setValue(g, "beatloop_" + size + "_toggle", 1);
+						//engine.setValue(g, "beatjump_" + 4 + "_forward", 1);
+					}
+				}, true);
+			});
 			this.loop("2," + (offset + 1), 1, group, 0.5);
 			this.loop("2," + (offset + 2), 1, group, 0.25);
 			this.loop("2," + (offset + 3), 1, group, 0.125);
@@ -151,7 +168,13 @@ NovationLaunchpad = {
 
 			// gator effect
 
-			this.gator("3," + (offset + 3),  1, group, 8, 0.7);
+			//this.gator("3," + (offset + 3),  1, group, 8, 0.7);
+
+			// spinback effect
+
+			this.toggle("3," + (offset + 3), "all", 1, 'hi_red', 'lo_red', group, "", function(g, n, v) {
+				engine.spinback(parseInt(g.substring(8,9)), v > 0, 3);
+			});
 
 			// led feedback for loop in/out buttons to show loop status
 
@@ -175,17 +198,17 @@ NovationLaunchpad = {
 
 			// transport
 
-			this.button("6," + (offset + 0), "all", 1, 'hi_yellow', 'lo_red', group, "cue_default");
+			this.button("6," + (offset + 0), "all", 1, 'hi_green', 'lo_red', group, "cue_default");
 
-			this.button("6," + (offset + 1), "press", 1, 'hi_yellow', 'lo_yellow', group, "rate", function(g, n, v) { 
-				engine.setValue(g, n, 0); 
+			this.button("6," + (offset + 1), "press", 1, 'hi_orange', 'lo_orange', group, "rate", function(g, n, v) {
+				engine.setValue(g, n, 0);
 			});
 
 			this.button("6," + (offset + 2), "press", 1, 'hi_yellow', 'lo_yellow', group, "rate_perm_down_small");
 			this.button("6," + (offset + 3), "press", 1, 'hi_yellow', 'lo_yellow', group, "rate_perm_up_small");
 
 			// play button
-			this.toggle("7," + (offset + 0), "press", 1, 'hi_yellow', 'lo_red', group, "play");
+			this.toggle("7," + (offset + 0), "press", 1, 'hi_green', 'lo_red', group, "play");
 
 			// flash play button when near end of track
 			engine.connectControl(group, "playposition", function(value, g, e) {
@@ -194,14 +217,14 @@ NovationLaunchpad = {
 				}
 				this.feedback_cache[g + e] = value;
 			});
-			
+
 			// sync or move beatgrid when shift is pressed
 
-			this.button("7," + (offset + 1), "all", 1, 'hi_yellow', 'lo_amber', group, "beatsync", function(g, n, v) { 
+			this.button("7," + (offset + 1), "all", 1, 'hi_orange', 'lo_orange', group, "beatsync", function(g, n, v) {
 				if (this.shift > 0)
-					engine.setValue(g, "beats_translate_curpos", v > 0 ? 1 : 0); 
+					engine.setValue(g, "beats_translate_curpos", v > 0 ? 1 : 0);
 				else
-					engine.setValue(g, n, v > 0 ? 1 : 0); 
+					engine.setValue(g, n, v > 0 ? 1 : 0);
 			});
 
 			// fwd/rev when not playing unless shift and then fine jog movements for beat gridding, jog when playing, jog more when shift+playing
@@ -212,24 +235,24 @@ NovationLaunchpad = {
 
 		//// MIXER PAGE ////
 
-		this.toggle("0,0", "all", 2, 'flash_hi_red', 'lo_red', "[Channel1]", "filterHighKill");
-		this.toggle("0,1", "all", 2, 'flash_hi_red', 'lo_red', "[Channel1]", "filterMidKill");
-		this.toggle("0,2", "all", 2, 'flash_hi_red', 'lo_red', "[Channel1]", "filterLowKill");
-		this.toggle("0,5", "all", 2, 'flash_hi_red', 'lo_red', "[Channel2]", "filterHighKill");
-		this.toggle("0,6", "all", 2, 'flash_hi_red', 'lo_red', "[Channel2]", "filterMidKill");
-		this.toggle("0,7", "all", 2, 'flash_hi_red', 'lo_red', "[Channel2]", "filterLowKill");
+		this.toggle("1,0", "all", 2, 'flash_hi_red', 'lo_red', "[Channel1]", "filterLowKill");
+		this.toggle("1,1", "all", 2, 'flash_hi_red', 'lo_red', "[Channel1]", "filterMidKill");
+		this.toggle("1,2", "all", 2, 'flash_hi_red', 'lo_red', "[Channel1]", "filterHighKill");
+		this.toggle("1,5", "all", 2, 'flash_hi_red', 'lo_red', "[Channel2]", "filterLowKill");
+		this.toggle("1,6", "all", 2, 'flash_hi_red', 'lo_red', "[Channel2]", "filterMidKill");
+		this.toggle("1,7", "all", 2, 'flash_hi_red', 'lo_red', "[Channel2]", "filterHighKill");
 
-		this.vfader(7, 0, 2, 7, 'hi_orange', 'lo_green', "[Channel1]", "filterLow");
-		this.vfader(7, 1, 2, 7, 'hi_orange', 'lo_green', "[Channel1]", "filterMid");
-		this.vfader(7, 2, 2, 7, 'hi_orange', 'lo_green', "[Channel1]", "filterHigh");
-		this.vfader(7, 5, 2, 7, 'hi_orange', 'lo_green', "[Channel2]", "filterLow");
-		this.vfader(7, 6, 2, 7, 'hi_orange', 'lo_green', "[Channel2]", "filterMid");
-		this.vfader(7, 7, 2, 7, 'hi_orange', 'lo_green', "[Channel2]", "filterHigh");
+		this.vfader( 7, 0, 2, 6, 'hi_orange' , 'black', "[Channel1]", "filterLow");
+		this.vfader( 7, 1, 2, 6, 'hi_amber'  , 'black', "[Channel1]", "filterMid");
+		this.vfader( 7, 2, 2, 6, 'hi_yellow' , 'black', "[Channel1]", "filterHigh");
+		this.vfader( 7, 5, 2, 6, 'hi_orange' , 'black', "[Channel2]", "filterLow");
+		this.vfader( 7, 6, 2, 6, 'hi_amber'  , 'black', "[Channel2]", "filterMid");
+		this.vfader( 7, 7, 2, 6, 'hi_yellow' , 'black', "[Channel2]", "filterHigh");
 
-		this.vfader(7, 3, 2, 8, 'hi_yellow', 'lo_red', "[Channel1]", "volume");
-		this.vfader(7, 4, 2, 8, 'hi_yellow', 'lo_red', "[Channel2]", "volume");
-		this.vumeter(7, 3, 2, 8, 'hi_yellow', 'lo_red', "[Channel1]", "VuMeter");
-		this.vumeter(7, 4, 2, 8, 'hi_yellow', 'lo_red', "[Channel2]", "VuMeter");
+		this.vfader( 7, 3, 2, 7, 'hi_green'  , 'black', "[Channel1]", "volume");
+		this.vfader( 7, 4, 2, 7, 'hi_green'  , 'black', "[Channel2]", "volume");
+		this.vumeter(7, 3, 2, 7, 'hi_green'  , 'black', "[Channel1]", "VuMeter");
+		this.vumeter(7, 4, 2, 7, 'hi_green'  , 'black', "[Channel2]", "VuMeter");
 
 		/////////////////////////////////////////////////////////////////////////
 		// button layout mapping ends here
@@ -481,7 +504,7 @@ NovationLaunchpad = {
 
 		// mixxx => launchpad
 
-		engine.connectControl(group, "hotcue_" + num + "_enabled", function(value, g, e) { 
+		engine.connectControl(group, "hotcue_" + num + "_enabled", function(value, g, e) {
 			this.send(name, this.colors[value > 0 ? 'hi_red' : 'black'], page);
 			this.feedback_cache[g + e] = value;
 		});
@@ -492,7 +515,7 @@ NovationLaunchpad = {
 	//
 
 	jog: function(name, page, group, dir) {
-		this.button(name, "all", page, 'hi_yellow', 'lo_amber', group, "", function(g, n, v) { 
+		this.button(name, "all", page, 'hi_orange', 'lo_orange', group, "", function(g, n, v) {
 
 			if (dir == "fwd") {
 				mult = 1;
@@ -513,10 +536,51 @@ NovationLaunchpad = {
 			}
 			else if (this.shift > 0) {
 				if (v > 0) {
-					engine.setValue(g, 'jog', 0.2 * mult); 
+					engine.setValue(g, 'jog', 0.2 * mult);
 				}
 			}
-			else engine.setValue(g, dir, v); 
+			else engine.setValue(g, dir, v);
+		});
+	},
+
+	//
+	// turn a row of pads into a crossfader
+	//
+
+	cfader: function(y, x, page, nbtns, on_color, off_color, group, action) {
+		var halfbtns = (nbtns-1)/2;
+
+		// launchpad => mixxx
+
+		for (var btn=0; btn<nbtns; btn++) {
+			this.capture(y+","+(x+btn), "press", page, function(g, name, value) {
+				var cap = name.match(/^\d+,(\d+)/); // value not closed
+				var num = (cap[1]-halfbtns) / halfbtns;
+				engine.setValue(group, action, num);
+			});
+			this.send(y+","+(x+btn), this.colors[on_color], page);
+		}
+
+		// mixxx => launchpad
+
+		engine.connectControl(group, action, function(value, g, e) {
+			for (btn=0; btn<(nbtns/2); btn++) {
+				if ((value<0) && (value <= ((btn-halfbtns)/halfbtns))) {
+					this.send(y+","+(x+btn), this.colors[on_color], page);
+				}
+				else {
+					this.send(y+","+(x+btn), this.colors[off_color], page);
+				}
+			}
+			for (btn=(nbtns/2); btn<nbtns; btn++) {
+				if ((value>0) && (value >= ((btn-halfbtns)/halfbtns))) {
+					this.send(y+","+(x+btn), this.colors[on_color], page);
+				}
+				else {
+					this.send(y+","+(x+btn), this.colors[off_color], page);
+				}
+			}
+			this.feedback_cache[g + e] = value;
 		});
 	},
 
@@ -525,14 +589,14 @@ NovationLaunchpad = {
 	//
 
 	vfader: function(y, x, page, nbtns, on_color, off_color, group, action) {
-		var incr = 1 / nbtns;
+		var incr = 1 / (nbtns-1);
 
 		// launchpad => mixxx
 
 		for (var btn=0; btn<nbtns; btn++) {
 			this.capture((y-btn)+","+x, "press", page, function(g, name, value) {
 				var cap = name.match(/^(\d+),\d+/); // value not closed
-				var num = y - cap[1] + 1;
+				var num = y - cap[1];
 				engine.setValue(group, action, incr * num);
 			});
 			this.send((y-btn)+","+x, this.colors[on_color], page);
@@ -540,9 +604,9 @@ NovationLaunchpad = {
 
 		// mixxx => launchpad
 
-		engine.connectControl(group, action, function(value, g, e) { 
+		engine.connectControl(group, action, function(value, g, e) {
 			for (btn=0; btn<nbtns; btn++) {
-				if (value > btn*incr) {
+				if (value >= btn*incr) {
 					this.send((y-btn)+","+x, this.colors[on_color], page);
 				}
 				else {
@@ -554,13 +618,32 @@ NovationLaunchpad = {
 	},
 
 	//
+	// turn a column of pads into a beatmeter
+	//
+
+	beatmeter: function(y, x, page, nbtns, on_color, off_color, group, action) {
+		var incr = 1 / nbtns;
+		this.beatmeters.push([ y, x, page, nbtns, on_color, off_color, group, action ]);
+		engine.connectControl(group, action, function(value, g, e) {
+			for (btn=0; btn<nbtns; btn++) {
+				if ((value > btn*incr) && (engine.getValue(g, "beat_active"))){
+					this.send((y-btn)+","+x, this.colors[on_color], page);
+				}
+				else {
+					this.send((y-btn)+","+x, this.colors[off_color], page);
+				}
+			}
+		});
+	},
+
+	//
 	// turn a column of pads into a vumeter
 	//
 
 	vumeter: function(y, x, page, nbtns, on_color, off_color, group, action) {
 		var incr = 1 / nbtns;
 		this.vumeters.push([ y, x, page, nbtns, on_color, off_color, group, action ]);
-		engine.connectControl(group, action, function(value, g, e) { 
+		engine.connectControl(group, action, function(value, g, e) {
 			if (this.vumeter_shift > 0) {
 				for (btn=0; btn<nbtns; btn++) {
 					if (value > btn*incr) {
@@ -586,7 +669,7 @@ NovationLaunchpad = {
 
 			var value = this.vumeter_shift > 0 ? 0 : this.feedback_cache[ this.vumeters[i][6] + 'volume' ];
 
-			if (value != undefined) { 
+			if (value != undefined) {
 				var y = this.vumeters[i][0];
 				var x = this.vumeters[i][1];
 				var page = this.vumeters[i][2];
@@ -703,7 +786,7 @@ NovationLaunchpad = {
 			lo_orange: 18 + 4,
 			hi_yellow: 50 + 4,
 			lo_yellow: 33 + 4,
-			
+
 			flash_lo_red: 1,
 			flash_mi_red: 2,
 			flash_hi_red: 3,
@@ -810,4 +893,3 @@ NovationLaunchpad = {
 		};
 	}
 };
-
