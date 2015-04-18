@@ -771,18 +771,19 @@ NovationLaunchpad = {
 		var updates = {};
 		var flashing = [];
 
-		for (i in this.cache[page]) {
-			if (this.cache[this.page][i] == undefined || this.cache[this.page][i] != this.cache[page][i]) {
-				updates[i] = this.cache[page][i];
+		if ((this.cache[page]) && (this.cache[this.page])) {
+			for (i in this.cache[page]) {
+				if (this.cache[this.page][i] == undefined || this.cache[this.page][i] != this.cache[page][i]) {
+					updates[i] = this.cache[page][i];
+				}
 			}
-		}
-
-		for (i in this.cache[this.page]) {
-			if (this.cache[page][i] == undefined) {
-				updates[i] = 0x4; // black with copy bit set
-			}
-			else if (this.cache[this.page][i] != this.cache[page][i] && updates[i] == undefined) {
-				updates[i] = this.cache[page][i];
+			for (i in this.cache[this.page]) {
+				if (this.cache[page][i] == undefined) {
+					updates[i] = 0x4; // black with copy bit set
+				}
+				else if (this.cache[this.page][i] != this.cache[page][i] && updates[i] == undefined) {
+					updates[i] = this.cache[page][i];
+				}
 			}
 		}
 
