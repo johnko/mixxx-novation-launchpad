@@ -23,7 +23,6 @@ NovationLaunchpad = {
 		this.name2control = {};
 		this.control2name = {};
 		this.vumeters = [];
-		this.beatmeters = [];
 
 		var self = NovationLaunchpad;
 		self.instance = this; // needed for incoming data from the launchpad
@@ -214,6 +213,9 @@ NovationLaunchpad = {
 			engine.connectControl(group, "playposition", function(value, g, e) {
 				if (value > 0.9 && engine.getValue(g, "play") > 0) {
 					this.send(g == "[Channel1]" ? "7,0" : "7,4", this.colors['flash_hi_red'], 1);
+				}
+				else if (value < 0.9 && engine.getValue(g, "play") > 0) {
+					this.send(g == "[Channel1]" ? "7,0" : "7,4", this.colors['hi_green'], 1);
 				}
 				this.feedback_cache[g + e] = value;
 			});
@@ -623,7 +625,6 @@ NovationLaunchpad = {
 
 	beatmeter: function(y, x, page, nbtns, on_color, off_color, group, action) {
 		var incr = 1 / nbtns;
-		this.beatmeters.push([ y, x, page, nbtns, on_color, off_color, group, action ]);
 		engine.connectControl(group, action, function(value, g, e) {
 			for (btn=0; btn<nbtns; btn++) {
 				if ((value > btn*incr) && (engine.getValue(g, "beat_active"))){
