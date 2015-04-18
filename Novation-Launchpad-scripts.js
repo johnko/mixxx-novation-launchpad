@@ -13,7 +13,8 @@ NovationLaunchpad = {
 		//
 
 		this.page = 1;
-		this.firstdeck = 1; // default 1, can be 3 for 3+4th decks
+		this.deckone = 1; // default 1, can be 3 for 3+4th decks
+		this.decktwo = this.deckone+1;
 		this.shift = 0;
 		this.shift2 = 0;
 		this.callbacks = {};
@@ -87,26 +88,28 @@ NovationLaunchpad = {
 
 		// load song to decks
 
-		this.button("left", "press", 0, 'hi_orange', 'lo_orange', "[Channel"+this.firstdeck+"]", "LoadSelectedTrack");
-		this.button("right", "press", 0, 'hi_orange', 'lo_orange', "[Channel"+(this.firstdeck+1)+"]", "LoadSelectedTrack");
+		this.button("left", "press", 0, 'hi_orange', 'lo_orange', "[Channel"+this.deckone+"]", "LoadSelectedTrack");
+		this.button("right", "press", 0, 'hi_orange', 'lo_orange', "[Channel"+this.decktwo+"]", "LoadSelectedTrack");
 
 		// deck/mixer page
 
 		this.button("session", "all", 0, 'hi_red', 'lo_red', '', '', function(g, n, v) { this.set_page( 1 ); });
+		//this.button("user1", "all", 0, 'hi_red', 'lo_red', '', '', function(g, n, v) { this.set_page( 3 ); });
+		//this.button("user2", "all", 0, 'hi_red', 'lo_red', '', '', function(g, n, v) { this.set_page( 4 ); });
 		this.button("mixer", "all", 0, 'hi_red', 'lo_red', '', '', function(g, n, v) { this.set_page( 2 ); });
 
 		// crossfader
 		this.cfader(0, 0, 0, 8, 'lo_green', 'black', "[Master]", "crossfader");
 
-		// Beat meter
+		// Beat blinker
 
-		this.beatmeter(0, 3, 0, 1, 'hi_green'  , 'black', "[Channel"+this.firstdeck+"]", "VuMeter");
-		this.beatmeter(0, 4, 0, 1, 'hi_green'  , 'black', "[Channel"+(this.firstdeck+1)+"]", "VuMeter");
+		this.beatblinker('left' , 0, 'hi_yellow'  , 'lo_orange', "[Channel"+this.deckone+"]" );
+		this.beatblinker('right', 0, 'hi_yellow'  , 'lo_orange', "[Channel"+this.decktwo+"]" );
 
 		// deck mappings
 
-		for (deck=this.firstdeck; deck<=(this.firstdeck+1); deck++) {
-			var offset = deck == this.firstdeck ? 0 : 4;
+		for (deck=this.deckone; deck<=this.decktwo; deck++) {
+			var offset = deck == this.deckone ? 0 : 4;
 			var group = "[Channel" + deck + "]";
 
 			// tracks
@@ -184,7 +187,7 @@ NovationLaunchpad = {
 			// led feedback for loop in/out buttons to show loop status
 
 			engine.connectControl(group, "loop_enabled", function(value, g, e) {
-				var offset = g == "[Channel"+this.firstdeck+"]" ? 0 : 4; // value not closed
+				var offset = g == "[Channel"+this.deckone+"]" ? 0 : 4; // value not closed
 				this.send("3," + (offset + 0), this.colors[value > 0 ? 'hi_green' : 'lo_green'], 1);
 				this.send("3," + (offset + 1), this.colors[value > 0 ? 'hi_green' : 'lo_green'], 1);
 				this.feedback_cache[g + e] = value;
@@ -218,11 +221,11 @@ NovationLaunchpad = {
 			// flash play button when near end of track
 			engine.connectControl(group, "playposition", function(value, g, e) {
 				if (value > 0.9 && engine.getValue(g, "play") > 0) {
-					this.send(g == "[Channel"+this.firstdeck+"]" ? "7,0" : "7,4", this.colors['flash_hi_red'], 1);
+					this.send(g == "[Channel"+this.deckone+"]" ? "7,0" : "7,4", this.colors['flash_hi_red'], 1);
 					this.send("session", this.colors['flash_hi_red'], 0);
 				}
 				else if (value < 0.9 && engine.getValue(g, "play") > 0) {
-					this.send(g == "[Channel"+this.firstdeck+"]" ? "7,0" : "7,4", this.colors['hi_green'], 1);
+					this.send(g == "[Channel"+this.deckone+"]" ? "7,0" : "7,4", this.colors['hi_green'], 1);
 					this.send("session", this.colors['lo_red'], 0);
 				}
 				else {
@@ -248,24 +251,24 @@ NovationLaunchpad = {
 
 		//// MIXER PAGE ////
 
-		this.toggle("1,0", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+this.firstdeck+"]", "filterLowKill");
-		this.toggle("1,1", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+this.firstdeck+"]", "filterMidKill");
-		this.toggle("1,2", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+this.firstdeck+"]", "filterHighKill");
-		this.toggle("1,5", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+(this.firstdeck+1)+"]", "filterLowKill");
-		this.toggle("1,6", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+(this.firstdeck+1)+"]", "filterMidKill");
-		this.toggle("1,7", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+(this.firstdeck+1)+"]", "filterHighKill");
+		this.toggle("1,0", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+this.deckone+"]", "filterLowKill");
+		this.toggle("1,1", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+this.deckone+"]", "filterMidKill");
+		this.toggle("1,2", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+this.deckone+"]", "filterHighKill");
+		this.toggle("1,5", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+this.decktwo+"]", "filterLowKill");
+		this.toggle("1,6", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+this.decktwo+"]", "filterMidKill");
+		this.toggle("1,7", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+this.decktwo+"]", "filterHighKill");
 
-		this.vfader( 7, 0, 2, 6, 'hi_orange' , 'black', "[Channel"+this.firstdeck+"]", "filterLow");
-		this.vfader( 7, 1, 2, 6, 'hi_amber'  , 'black', "[Channel"+this.firstdeck+"]", "filterMid");
-		this.vfader( 7, 2, 2, 6, 'hi_yellow' , 'black', "[Channel"+this.firstdeck+"]", "filterHigh");
-		this.vfader( 7, 5, 2, 6, 'hi_orange' , 'black', "[Channel"+(this.firstdeck+1)+"]", "filterLow");
-		this.vfader( 7, 6, 2, 6, 'hi_amber'  , 'black', "[Channel"+(this.firstdeck+1)+"]", "filterMid");
-		this.vfader( 7, 7, 2, 6, 'hi_yellow' , 'black', "[Channel"+(this.firstdeck+1)+"]", "filterHigh");
+		this.vfader( 7, 0, 2, 6, 'hi_orange' , 'black', "[Channel"+this.deckone+"]", "filterLow");
+		this.vfader( 7, 1, 2, 6, 'hi_amber'  , 'black', "[Channel"+this.deckone+"]", "filterMid");
+		this.vfader( 7, 2, 2, 6, 'hi_yellow' , 'black', "[Channel"+this.deckone+"]", "filterHigh");
+		this.vfader( 7, 5, 2, 6, 'hi_orange' , 'black', "[Channel"+this.decktwo+"]", "filterLow");
+		this.vfader( 7, 6, 2, 6, 'hi_amber'  , 'black', "[Channel"+this.decktwo+"]", "filterMid");
+		this.vfader( 7, 7, 2, 6, 'hi_yellow' , 'black', "[Channel"+this.decktwo+"]", "filterHigh");
 
-		this.vfader( 7, 3, 2, 7, 'hi_green'  , 'black', "[Channel"+this.firstdeck+"]", "volume");
-		this.vfader( 7, 4, 2, 7, 'hi_green'  , 'black', "[Channel"+(this.firstdeck+1)+"]", "volume");
-		this.vumeter(7, 3, 2, 7, 'hi_green'  , 'black', "[Channel"+this.firstdeck+"]", "VuMeter");
-		this.vumeter(7, 4, 2, 7, 'hi_green'  , 'black', "[Channel"+(this.firstdeck+1)+"]", "VuMeter");
+		this.vfader( 7, 3, 2, 7, 'hi_green'  , 'black', "[Channel"+this.deckone+"]", "volume");
+		this.vfader( 7, 4, 2, 7, 'hi_green'  , 'black', "[Channel"+this.decktwo+"]", "volume");
+		this.vumeter(7, 3, 2, 7, 'hi_green'  , 'black', "[Channel"+this.deckone+"]", "VuMeter");
+		this.vumeter(7, 4, 2, 7, 'hi_green'  , 'black', "[Channel"+this.decktwo+"]", "VuMeter");
 
 		/////////////////////////////////////////////////////////////////////////
 		// button layout mapping ends here
@@ -631,19 +634,16 @@ NovationLaunchpad = {
 	},
 
 	//
-	// turn a column of pads into a beatmeter
+	// turn a button into a beatblinker
 	//
 
-	beatmeter: function(y, x, page, nbtns, on_color, off_color, group, action) {
-		var incr = 1 / nbtns;
-		engine.connectControl(group, action, function(value, g, e) {
-			for (btn=0; btn<nbtns; btn++) {
-				if ((value > btn*incr) && (engine.getValue(g, "beat_active"))){
-					this.send((y-btn)+","+x, this.colors[on_color], page);
-				}
-				else {
-					this.send((y-btn)+","+x, this.colors[off_color], page);
-				}
+	beatblinker: function(name, page, on_color, off_color, group) {
+		engine.connectControl(group, "VuMeter", function(value, g, e) {
+			if (engine.getValue(g, "beat_active")){
+				this.send(name, this.colors[on_color], page);
+			}
+			else {
+				this.send(name, this.colors[off_color], page);
 			}
 		});
 	},

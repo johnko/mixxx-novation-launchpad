@@ -95,3 +95,10 @@ there's also plenty of other buttons unmapped at the moment that could be used.
 * fix bottom of vfader is now 0, and top is 100
 * beat meter on the crossfader middle (row 1, column 4&5), lights up on a beat for deck A/B respectively
 * tried to do beatloop and beatjump, but not ready until Mixxx version 1.12
+
+## UPDATES by johnko Apr 18, 2015
+
+* reset play color to green if playposition < 0.9
+* Launchpad S and install.sh
+* dynamic this.deckone (change it manually in script) to support 4 deck layouts
+* beatmeter is renamed to beatblinker, and set to left/right buttons
