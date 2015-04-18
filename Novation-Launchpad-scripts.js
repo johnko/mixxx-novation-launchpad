@@ -102,8 +102,8 @@ NovationLaunchpad = {
 		// deck/mixer page
 
 		this.button("session", "all", 0, 'hi_red', 'lo_red', '', '', function(g, n, v) { this.set_page( 1 ); });
-		this.button("user1", "all", 0, 'hi_red', 'lo_red', '', '', function(g, n, v) { this.set_page( 3 ); });
-		this.button("user2", "all", 0, 'hi_red', 'lo_red', '', '', function(g, n, v) { this.set_page( 4 ); });
+		//this.button("user1", "all", 0, 'hi_red', 'lo_red', '', '', function(g, n, v) { this.set_page( 4 ); });
+		this.button("user2", "all", 0, 'hi_red', 'lo_red', '', '', function(g, n, v) { this.set_page( 3 ); });
 		this.button("mixer", "all", 0, 'hi_red', 'lo_red', '', '', function(g, n, v) { this.set_page( 2 ); });
 
 		// crossfader
@@ -777,13 +777,13 @@ NovationLaunchpad = {
 					updates[i] = this.cache[page][i];
 				}
 			}
-			for (i in this.cache[this.page]) {
-				if (this.cache[page][i] == undefined) {
-					updates[i] = 0x4; // black with copy bit set
-				}
-				else if (this.cache[this.page][i] != this.cache[page][i] && updates[i] == undefined) {
-					updates[i] = this.cache[page][i];
-				}
+		}
+		for (i in this.cache[this.page]) {
+			if (this.cache[page] == undefined || this.cache[page][i] == undefined) {
+				updates[i] = 0x4; // black with copy bit set
+			}
+			else if (this.cache[this.page][i] != this.cache[page][i] && updates[i] == undefined) {
+				updates[i] = this.cache[page][i];
 			}
 		}
 
