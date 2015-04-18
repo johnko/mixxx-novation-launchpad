@@ -13,6 +13,7 @@ NovationLaunchpadS = {
 		//
 
 		this.page = 1;
+		this.firstdeck = 1; // default 1, can be 3 for 3+4th decks
 		this.shift = 0;
 		this.shift2 = 0;
 		this.callbacks = {};
@@ -72,10 +73,10 @@ NovationLaunchpadS = {
 
 		// shift buttons
 
+		this.toggle("vol", "all", 2, 'hi_red', 'lo_red', '', '', function(g, n, v) { this.vumeter_toggle(v); });
+
 		this.button("arm", "all", 1, 'hi_yellow', 'lo_yellow', '', '', function(g, n, v) { this.shift = v > 0 ? 1 : 0; });
 		this.button("solo", "all", 1, 'hi_yellow', 'lo_yellow', '', '', function(g, n, v) { this.shift2 = v > 0 ? 1 : 0; });
-		this.toggle("mixer", "all", 0, 'hi_red', 'lo_red', '', '', function(g, n, v) { this.set_page(v > 0 ? 2 : 1); });
-		this.toggle("vol", "all", 2, 'hi_red', 'lo_red', '', '', function(g, n, v) { this.vumeter_toggle(v); });
 
 		//// MAIN PAGE ////
 
@@ -86,21 +87,26 @@ NovationLaunchpadS = {
 
 		// load song to decks
 
-		this.button("left", "press", 0, 'hi_orange', 'lo_orange', "[Channel1]", "LoadSelectedTrack");
-		this.button("right", "press", 0, 'hi_orange', 'lo_orange', "[Channel2]", "LoadSelectedTrack");
+		this.button("left", "press", 0, 'hi_orange', 'lo_orange', "[Channel"+this.firstdeck+"]", "LoadSelectedTrack");
+		this.button("right", "press", 0, 'hi_orange', 'lo_orange', "[Channel"+(this.firstdeck+1)+"]", "LoadSelectedTrack");
+
+		// deck/mixer page
+
+		this.button("session", "all", 0, 'hi_red', 'lo_red', '', '', function(g, n, v) { this.set_page( 1 ); });
+		this.button("mixer", "all", 0, 'hi_red', 'lo_red', '', '', function(g, n, v) { this.set_page( 2 ); });
 
 		// crossfader
 		this.cfader(0, 0, 0, 8, 'lo_green', 'black', "[Master]", "crossfader");
 
 		// Beat meter
 
-		this.beatmeter(0, 3, 0, 1, 'hi_green'  , 'black', "[Channel1]", "VuMeter");
-		this.beatmeter(0, 4, 0, 1, 'hi_green'  , 'black', "[Channel2]", "VuMeter");
+		this.beatmeter(0, 3, 0, 1, 'hi_green'  , 'black', "[Channel"+this.firstdeck+"]", "VuMeter");
+		this.beatmeter(0, 4, 0, 1, 'hi_green'  , 'black', "[Channel"+(this.firstdeck+1)+"]", "VuMeter");
 
 		// deck mappings
 
-		for (deck=1; deck<=2; deck++) {
-			var offset = deck == 1 ? 0 : 4;
+		for (deck=this.firstdeck; deck<=(this.firstdeck+1); deck++) {
+			var offset = deck == this.firstdeck ? 0 : 4;
 			var group = "[Channel" + deck + "]";
 
 			// tracks
@@ -178,7 +184,7 @@ NovationLaunchpadS = {
 			// led feedback for loop in/out buttons to show loop status
 
 			engine.connectControl(group, "loop_enabled", function(value, g, e) {
-				var offset = g == "[Channel1]" ? 0 : 4; // value not closed
+				var offset = g == "[Channel"+this.firstdeck+"]" ? 0 : 4; // value not closed
 				this.send("3," + (offset + 0), this.colors[value > 0 ? 'hi_green' : 'lo_green'], 1);
 				this.send("3," + (offset + 1), this.colors[value > 0 ? 'hi_green' : 'lo_green'], 1);
 				this.feedback_cache[g + e] = value;
@@ -212,10 +218,15 @@ NovationLaunchpadS = {
 			// flash play button when near end of track
 			engine.connectControl(group, "playposition", function(value, g, e) {
 				if (value > 0.9 && engine.getValue(g, "play") > 0) {
-					this.send(g == "[Channel1]" ? "7,0" : "7,4", this.colors['flash_hi_red'], 1);
+					this.send(g == "[Channel"+this.firstdeck+"]" ? "7,0" : "7,4", this.colors['flash_hi_red'], 1);
+					this.send("session", this.colors['flash_hi_red'], 0);
 				}
 				else if (value < 0.9 && engine.getValue(g, "play") > 0) {
-					this.send(g == "[Channel1]" ? "7,0" : "7,4", this.colors['hi_green'], 1);
+					this.send(g == "[Channel"+this.firstdeck+"]" ? "7,0" : "7,4", this.colors['hi_green'], 1);
+					this.send("session", this.colors['lo_red'], 0);
+				}
+				else {
+					this.send("session", this.colors['lo_red'], 0);
 				}
 				this.feedback_cache[g + e] = value;
 			});
@@ -237,24 +248,24 @@ NovationLaunchpadS = {
 
 		//// MIXER PAGE ////
 
-		this.toggle("1,0", "all", 2, 'flash_hi_red', 'lo_red', "[Channel1]", "filterLowKill");
-		this.toggle("1,1", "all", 2, 'flash_hi_red', 'lo_red', "[Channel1]", "filterMidKill");
-		this.toggle("1,2", "all", 2, 'flash_hi_red', 'lo_red', "[Channel1]", "filterHighKill");
-		this.toggle("1,5", "all", 2, 'flash_hi_red', 'lo_red', "[Channel2]", "filterLowKill");
-		this.toggle("1,6", "all", 2, 'flash_hi_red', 'lo_red', "[Channel2]", "filterMidKill");
-		this.toggle("1,7", "all", 2, 'flash_hi_red', 'lo_red', "[Channel2]", "filterHighKill");
+		this.toggle("1,0", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+this.firstdeck+"]", "filterLowKill");
+		this.toggle("1,1", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+this.firstdeck+"]", "filterMidKill");
+		this.toggle("1,2", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+this.firstdeck+"]", "filterHighKill");
+		this.toggle("1,5", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+(this.firstdeck+1)+"]", "filterLowKill");
+		this.toggle("1,6", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+(this.firstdeck+1)+"]", "filterMidKill");
+		this.toggle("1,7", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+(this.firstdeck+1)+"]", "filterHighKill");
 
-		this.vfader( 7, 0, 2, 6, 'hi_orange' , 'black', "[Channel1]", "filterLow");
-		this.vfader( 7, 1, 2, 6, 'hi_amber'  , 'black', "[Channel1]", "filterMid");
-		this.vfader( 7, 2, 2, 6, 'hi_yellow' , 'black', "[Channel1]", "filterHigh");
-		this.vfader( 7, 5, 2, 6, 'hi_orange' , 'black', "[Channel2]", "filterLow");
-		this.vfader( 7, 6, 2, 6, 'hi_amber'  , 'black', "[Channel2]", "filterMid");
-		this.vfader( 7, 7, 2, 6, 'hi_yellow' , 'black', "[Channel2]", "filterHigh");
+		this.vfader( 7, 0, 2, 6, 'hi_orange' , 'black', "[Channel"+this.firstdeck+"]", "filterLow");
+		this.vfader( 7, 1, 2, 6, 'hi_amber'  , 'black', "[Channel"+this.firstdeck+"]", "filterMid");
+		this.vfader( 7, 2, 2, 6, 'hi_yellow' , 'black', "[Channel"+this.firstdeck+"]", "filterHigh");
+		this.vfader( 7, 5, 2, 6, 'hi_orange' , 'black', "[Channel"+(this.firstdeck+1)+"]", "filterLow");
+		this.vfader( 7, 6, 2, 6, 'hi_amber'  , 'black', "[Channel"+(this.firstdeck+1)+"]", "filterMid");
+		this.vfader( 7, 7, 2, 6, 'hi_yellow' , 'black', "[Channel"+(this.firstdeck+1)+"]", "filterHigh");
 
-		this.vfader( 7, 3, 2, 7, 'hi_green'  , 'black', "[Channel1]", "volume");
-		this.vfader( 7, 4, 2, 7, 'hi_green'  , 'black', "[Channel2]", "volume");
-		this.vumeter(7, 3, 2, 7, 'hi_green'  , 'black', "[Channel1]", "VuMeter");
-		this.vumeter(7, 4, 2, 7, 'hi_green'  , 'black', "[Channel2]", "VuMeter");
+		this.vfader( 7, 3, 2, 7, 'hi_green'  , 'black', "[Channel"+this.firstdeck+"]", "volume");
+		this.vfader( 7, 4, 2, 7, 'hi_green'  , 'black', "[Channel"+(this.firstdeck+1)+"]", "volume");
+		this.vumeter(7, 3, 2, 7, 'hi_green'  , 'black', "[Channel"+this.firstdeck+"]", "VuMeter");
+		this.vumeter(7, 4, 2, 7, 'hi_green'  , 'black', "[Channel"+(this.firstdeck+1)+"]", "VuMeter");
 
 		/////////////////////////////////////////////////////////////////////////
 		// button layout mapping ends here
