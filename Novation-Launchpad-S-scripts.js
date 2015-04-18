@@ -1,10 +1,10 @@
 /****************************************************************/
-/*      Novation Launchpad Mapping                              */
+/*      Novation Launchpad S Mapping                            */
 /*      For Mixxx version 1.11                                  */
 /*      Author: zestoi / johnko                                 */
 /****************************************************************/
 
-NovationLaunchpad = {
+NovationLaunchpadS = {
 
 	init: function() {
 
@@ -24,7 +24,7 @@ NovationLaunchpad = {
 		this.control2name = {};
 		this.vumeters = [];
 
-		var self = NovationLaunchpad;
+		var self = NovationLaunchpadS;
 		self.instance = this; // needed for incoming data from the launchpad
 
 		this.colors = self.colors();
@@ -273,7 +273,7 @@ NovationLaunchpad = {
 	//
 
 	incomingData: function(channel, control, value, status, group) {
-		var me = NovationLaunchpad.instance;
+		var me = NovationLaunchpadS.instance;
 		if ((name = me.control2name["" + status + control]) != undefined) {
 			if (me.callbacks[name] != undefined) {
 				var callbacks = me.callbacks[name];
@@ -306,7 +306,7 @@ NovationLaunchpad = {
 
 	gator: function(name, page, group, rate, depth) {
 		this.button(name, "all", page, 'hi_red', 'lo_red', group, "", function(g, n, v) {
-			var self = NovationLaunchpad;
+			var self = NovationLaunchpadS;
 			if (typeof(self.gator_timer) != undefined && self.gator_timer != null) {
 				engine.stopTimer(self.gator_timer);
 				self.gator_timer = null;
@@ -317,7 +317,7 @@ NovationLaunchpad = {
 					var interval = parseInt(1000 / bpm * 60 / rate);
 					self.gator_direction = false;
 					self.gator_depth = depth;
-					self.gator_timer = engine.beginTimer(interval, 'NovationLaunchpad.process_gator("' + g + '")');
+					self.gator_timer = engine.beginTimer(interval, 'NovationLaunchpadS.process_gator("' + g + '")');
 				}
 			}
 			else {
@@ -331,7 +331,7 @@ NovationLaunchpad = {
 	//
 
 	process_gator: function(group) {
-		var self = NovationLaunchpad;
+		var self = NovationLaunchpadS;
 		self.gator_direction = !self.gator_direction;
 		engine.setValue(group, 'filterHighKill', self.gator_direction ? 1 : 0);
 	},
@@ -370,7 +370,7 @@ NovationLaunchpad = {
 
 	playlist: function(name, page, action) {
 		this.button(name, "all", page, 'hi_yellow', 'lo_yellow', "[Playlist]", action, function(g, n, v) {
-			var self = NovationLaunchpad;
+			var self = NovationLaunchpadS;
 			if (typeof(self.playlist_timer) != undefined && self.playlist_timer != null) {
 				engine.stopTimer(self.playlist_timer);
 				self.playlist_timer = null;
@@ -378,7 +378,7 @@ NovationLaunchpad = {
 
 			if (v > 0) {
 				engine.setValue("[Playlist]", action, 1);
-				self.playlist_timer = engine.beginTimer(this.shift > 0 ? 30 : 150, 'NovationLaunchpad.process_playlist("' + action + '")');
+				self.playlist_timer = engine.beginTimer(this.shift > 0 ? 30 : 150, 'NovationLaunchpadS.process_playlist("' + action + '")');
 			}
 		});
 	},
