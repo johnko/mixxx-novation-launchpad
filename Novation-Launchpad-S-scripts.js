@@ -294,7 +294,7 @@ NovationLaunchpadS = {
 				'lucky2',
 				'lucky3',
 				'l','u','c','k','y'
-			], 500, 3, 'hi_green', 'black', 1, 0);
+			], 300, 3, 'hi_green', 'black', 1, 0);
 		});
 		this.button('3,4', 'press', 3, 'black', 'black', '', '', function(g,n,v){
 			this.stopanimation = false;
@@ -304,7 +304,7 @@ NovationLaunchpadS = {
 				'star2',
 				'star3',
 				's','t','a','r'
-			], 500, 3, 'hi_yellow', 'black', 1, 0);
+			], 300, 3, 'hi_yellow', 'black', 1, 0);
 		});
 		this.button('4,4', 'press', 3, 'black', 'black', '', '', function(g,n,v){
 			this.stopanimation = false;
@@ -314,7 +314,7 @@ NovationLaunchpadS = {
 				'heart2',
 				'heart3',
 				'l','o','v','e'
-			], 500, 3, 'hi_red', 'black', 1, 0);
+			], 300, 3, 'hi_red', 'black', 1, 0);
 		});
 
 		/////////////////////////////////////////////////////////////////////////
