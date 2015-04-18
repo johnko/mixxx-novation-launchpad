@@ -107,7 +107,8 @@ NovationLaunchpad = {
 		this.button("mixer", "all", 0, 'hi_red', 'lo_red', '', '', function(g, n, v) { this.set_page( 2 ); });
 
 		// crossfader
-		this.cfader(0, 0, 0, 8, 'lo_green', 'black', "[Master]", "crossfader");
+		this.cfader(0, 0, 1, 8, 'lo_green', 'black', "[Master]", "crossfader");
+		this.cfader(0, 0, 2, 8, 'lo_green', 'black', "[Master]", "crossfader");
 
 		// Beat blinker
 
