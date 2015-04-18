@@ -102,3 +102,4 @@ there's also plenty of other buttons unmapped at the moment that could be used.
 * Launchpad S and install.sh
 * dynamic this.deckone (change it manually in script) to support 4 deck layouts
 * beatmeter is renamed to beatblinker, and set to left/right buttons
+* shapes with showshape and animateshapestimer, stop animation with stop button
