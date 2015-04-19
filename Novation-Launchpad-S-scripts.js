@@ -135,7 +135,7 @@ NovationLaunchpadS = {
 
 			// brake effect
 
-			this.toggle("1," + (offset + 3), "all", 1, 'hi_red', 'lo_red', group, "", function(g, n, v) {
+			this.toggle("1," + (offset + 3), "all", 1, 'flash_hi_red', 'lo_red', group, "", function(g, n, v) {
 				engine.brake(parseInt(g.substring(8,9)), v > 0);
 			});
 
@@ -189,7 +189,7 @@ NovationLaunchpadS = {
 
 			// spinback effect
 
-			this.toggle("3," + (offset + 3), "all", 1, 'hi_red', 'lo_red', group, "", function(g, n, v) {
+			this.toggle("3," + (offset + 3), "all", 1, 'flash_hi_red', 'lo_red', group, "", function(g, n, v) {
 				engine.spinback(parseInt(g.substring(8,9)), v > 0, 3);
 			});
 
@@ -217,7 +217,7 @@ NovationLaunchpadS = {
 
 			this.button("6," + (offset + 0), "all", 1, 'hi_green', 'lo_red', group, "cue_default");
 
-			this.button("6," + (offset + 1), "press", 1, 'hi_orange', 'lo_orange', group, "rate", function(g, n, v) {
+			this.button("6," + (offset + 1), "press", 1, 'hi_red', 'lo_orange', group, "rate", function(g, n, v) {
 				engine.setValue(g, n, 0);
 			});
 
@@ -502,7 +502,7 @@ NovationLaunchpadS = {
 		// mixxx => launchpad
 
 		engine.connectControl(group, event, function(value, g, e) {
-			this.send(name, this.colors[value > 0 ? on_color : off_color], page);
+			this.send(name, this.colors[(value > 0 || value < 0) ? on_color : off_color], page);
 			this.feedback_cache[g + e] = value;
 		});
 
