@@ -103,3 +103,6 @@ there's also plenty of other buttons unmapped at the moment that could be used.
 * dynamic this.deckone (change it manually in script) to support 4 deck layouts
 * beatmeter is renamed to beatblinker, and set to left/right buttons
 * shapes with showshape and animateshapestimer, stop animation with stop button
+* flash the active brake/spinback
+* hi_red active pitch >0 and <0
+* animations are almost beat matched based on a timer (at double speed) [ for normal speed, change result = (60/activedeckbpm)*1000 ]

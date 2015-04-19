@@ -287,39 +287,76 @@ NovationLaunchpadS = {
 		this.nextshape('arm' , this.shapesbyname, 3, 'hi_green', 'black',  1);
 		this.nextshape('solo', this.shapesbyname, 3, 'hi_green', 'black', -1);
 		this.button('2,4', 'press', 3, 'black', 'black', '', '', function(g,n,v){
-			this.stopanimation = false;
-			this.animateshapestimer([
-				'lucky0',
-				'lucky1',
-				'lucky2',
-				'lucky3',
-				'l','u','c','k','y'
-			], 300, 3, 'hi_green', 'black', 1, 0);
+			this.stopanimation = true;
+			engine.beginTimer(this.msperbeat(), function() {
+				var self = NovationLaunchpadS;
+				if (self.stopanimation) {
+					self.stopanimation = false;
+					self.animateshapestimer([
+						'lucky0',
+						'lucky1',
+						'lucky2',
+						'lucky3',
+						'l','u','c','k','y'
+					], self.msperbeat(), 3, 'hi_green', 'black', 1, 0);
+				}
+			}, true);
 		});
 		this.button('3,4', 'press', 3, 'black', 'black', '', '', function(g,n,v){
-			this.stopanimation = false;
-			this.animateshapestimer([
-				'star0',
-				'star1',
-				'star2',
-				'star3',
-				's','t','a','r'
-			], 300, 3, 'hi_yellow', 'black', 1, 0);
+			this.stopanimation = true;
+			engine.beginTimer(this.msperbeat(), function() {
+				var self = NovationLaunchpadS;
+				if (self.stopanimation) {
+					self.stopanimation = false;
+					self.animateshapestimer([
+						'star0',
+						'star1',
+						'star2',
+						'star3',
+						's','t','a','r'
+					], self.msperbeat(), 3, 'hi_yellow', 'black', 1, 0);
+				}
+			}, true);
 		});
 		this.button('4,4', 'press', 3, 'black', 'black', '', '', function(g,n,v){
-			this.stopanimation = false;
-			this.animateshapestimer([
-				'heart0',
-				'heart1',
-				'heart2',
-				'heart3',
-				'l','o','v','e'
-			], 300, 3, 'hi_red', 'black', 1, 0);
+			this.stopanimation = true;
+			engine.beginTimer(this.msperbeat(), function() {
+				var self = NovationLaunchpadS;
+				if (self.stopanimation) {
+					self.stopanimation = false;
+					self.animateshapestimer([
+						'heart0',
+						'heart1',
+						'heart2',
+						'heart3',
+						'l','o','v','e'
+					], self.msperbeat(), 3, 'hi_red', 'black', 1, 0);
+				}
+			}, true);
 		});
 
 		/////////////////////////////////////////////////////////////////////////
 		// button layout mapping ends here
 		/////////////////////////////////////////////////////////////////////////
+	},
+
+	//
+	// msperbeat
+	//
+
+	msperbeat: function() {
+		var activedeckbpm = 0;
+		var result = 10000;
+		if (engine.getValue("[Master]", "crossfader")<0) {
+			activedeckbpm = engine.getValue("[Channel"+this.deckone+"]", "bpm");
+		}
+		else {
+			activedeckbpm = engine.getValue("[Channel"+this.decktwo+"]", "bpm");
+		}
+		if (activedeckbpm>0) {
+			result = (60/activedeckbpm)*1000/2;
+		}
+		return result;
 	},
 
 	//
@@ -971,7 +1008,7 @@ NovationLaunchpadS = {
 				}
 			}
 			if ((!stop) && (!self.stopanimation)) {
-				self.animateshapestimer(array, timer, page, on_color, off_color, direction, index, action);
+				self.animateshapestimer(array, self.msperbeat(), page, on_color, off_color, direction, index, action);
 			}
 		}, true);
 	},
