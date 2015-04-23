@@ -105,4 +105,11 @@ there's also plenty of other buttons unmapped at the moment that could be used.
 * shapes with showshape and animateshapestimer, stop animation with stop button
 * flash the active brake/spinback
 * hi_red active pitch >0 and <0
-* animations are almost beat matched based on a timer (at double speed) [ for normal speed, change result = (60/activedeckbpm)*1000 ]
+* animations are almost beat matched based on a timer (at double speed) [ for normal speed, change result = (60/activedeckbpm)\*1000 ]
+
+## UPDATES by johnko Apr 23, 2015
+
+* msperbeat default is now 500
+* vfader on mixer page acts like a manual gator if vol button is on
+* gator is now row 1 on mixer page
+* filterkill is now row 2

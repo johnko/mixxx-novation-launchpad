@@ -17,6 +17,7 @@ NovationLaunchpadS = {
 		this.decktwo = this.deckone+1;
 		this.shift = 0;
 		this.shift2 = 0;
+		this.vumeter_shift = 0;
 		this.callbacks = {};
 		this.feedbacks = {};
 		this.cache = [{}, {}, {}, {}];
@@ -183,10 +184,6 @@ NovationLaunchpadS = {
 
 			this.button("3," + (offset + 2), "all", 1, 'hi_green', 'lo_green', group, "reloop_exit");
 
-			// gator effect
-
-			//this.gator("3," + (offset + 3),  1, group, 8, 0.7);
-
 			// spinback effect
 
 			this.toggle("3," + (offset + 3), "all", 1, 'flash_hi_red', 'lo_red', group, "", function(g, n, v) {
@@ -260,19 +257,29 @@ NovationLaunchpadS = {
 
 		//// MIXER PAGE ////
 
-		this.toggle("1,0", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+this.deckone+"]", "filterLowKill");
-		this.toggle("1,1", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+this.deckone+"]", "filterMidKill");
-		this.toggle("1,2", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+this.deckone+"]", "filterHighKill");
-		this.toggle("1,5", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+this.decktwo+"]", "filterLowKill");
-		this.toggle("1,6", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+this.decktwo+"]", "filterMidKill");
-		this.toggle("1,7", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+this.decktwo+"]", "filterHighKill");
+		// gator effect
 
-		this.vfader( 7, 0, 2, 6, 'hi_orange' , 'black', "[Channel"+this.deckone+"]", "filterLow");
-		this.vfader( 7, 1, 2, 6, 'hi_amber'  , 'black', "[Channel"+this.deckone+"]", "filterMid");
-		this.vfader( 7, 2, 2, 6, 'hi_yellow' , 'black', "[Channel"+this.deckone+"]", "filterHigh");
-		this.vfader( 7, 5, 2, 6, 'hi_orange' , 'black', "[Channel"+this.decktwo+"]", "filterLow");
-		this.vfader( 7, 6, 2, 6, 'hi_amber'  , 'black', "[Channel"+this.decktwo+"]", "filterMid");
-		this.vfader( 7, 7, 2, 6, 'hi_yellow' , 'black', "[Channel"+this.decktwo+"]", "filterHigh");
+		this.gator( "1,0", 2, "[Channel"+this.deckone+"]", "filterLowKill" , 4, 0.7);
+		this.gator( "1,1", 2, "[Channel"+this.deckone+"]", "filterMidKill" , 4, 0.7);
+		this.gator( "1,2", 2, "[Channel"+this.deckone+"]", "filterHighKill", 4, 0.7);
+		this.gator( "1,5", 2, "[Channel"+this.decktwo+"]", "filterLowKill" , 4, 0.7);
+		this.gator( "1,6", 2, "[Channel"+this.decktwo+"]", "filterMidKill" , 4, 0.7);
+		this.gator( "1,7", 2, "[Channel"+this.decktwo+"]", "filterHighKill", 4, 0.7);
+
+		this.toggle("2,0", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+this.deckone+"]", "filterLowKill");
+		this.toggle("2,1", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+this.deckone+"]", "filterMidKill");
+		this.toggle("2,2", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+this.deckone+"]", "filterHighKill");
+		this.toggle("2,5", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+this.decktwo+"]", "filterLowKill");
+		this.toggle("2,6", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+this.decktwo+"]", "filterMidKill");
+		this.toggle("2,7", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+this.decktwo+"]", "filterHighKill");
+
+		this.vfader( 7, 0, 2, 5, 'hi_orange' , 'black', "[Channel"+this.deckone+"]", "filterLow");
+		this.vfader( 7, 1, 2, 5, 'hi_amber'  , 'black', "[Channel"+this.deckone+"]", "filterMid");
+		this.vfader( 7, 2, 2, 5, 'hi_yellow' , 'black', "[Channel"+this.deckone+"]", "filterHigh");
+		this.vfader( 7, 5, 2, 5, 'hi_orange' , 'black', "[Channel"+this.decktwo+"]", "filterLow");
+		this.vfader( 7, 6, 2, 5, 'hi_amber'  , 'black', "[Channel"+this.decktwo+"]", "filterMid");
+		this.vfader( 7, 7, 2, 5, 'hi_yellow' , 'black', "[Channel"+this.decktwo+"]", "filterHigh");
+
 
 		this.vfader( 7, 3, 2, 7, 'hi_green'  , 'black', "[Channel"+this.deckone+"]", "volume");
 		this.vfader( 7, 4, 2, 7, 'hi_green'  , 'black', "[Channel"+this.decktwo+"]", "volume");
@@ -346,7 +353,7 @@ NovationLaunchpadS = {
 
 	msperbeat: function() {
 		var activedeckbpm = 0;
-		var result = 10000;
+		var result = 500;
 		if (engine.getValue("[Master]", "crossfader")<0) {
 			activedeckbpm = engine.getValue("[Channel"+this.deckone+"]", "bpm");
 		}
@@ -402,8 +409,8 @@ NovationLaunchpadS = {
 	// gator effect using high eq kill
 	//
 
-	gator: function(name, page, group, rate, depth) {
-		this.button(name, "all", page, 'hi_red', 'lo_red', group, "", function(g, n, v) {
+	gator: function(name, page, group, action, rate, depth) {
+		this.button(name, "all", page, 'hi_red', 'black', group, "", function(g, n, v) {
 			var self = NovationLaunchpadS;
 			if (typeof(self.gator_timer) != undefined && self.gator_timer != null) {
 				engine.stopTimer(self.gator_timer);
@@ -411,15 +418,15 @@ NovationLaunchpadS = {
 			}
 
 			if (v > 0) {
-				if ((bpm = engine.getValue(g, 'bpm')) > 0) {
-					var interval = parseInt(1000 / bpm * 60 / rate);
+				//if ((bpm = engine.getValue(g, 'bpm')) > 0) {
+					var interval = self.msperbeat()/rate;
 					self.gator_direction = false;
 					self.gator_depth = depth;
-					self.gator_timer = engine.beginTimer(interval, 'NovationLaunchpadS.process_gator("' + g + '")');
-				}
+					self.gator_timer = engine.beginTimer(interval, 'NovationLaunchpadS.process_gator("' + g + '","'+action+'")');
+				//}
 			}
 			else {
-				engine.setValue(group, 'filterHighKill', 0);
+				engine.setValue(group, action, 0);
 			}
 		});
 	},
@@ -428,10 +435,10 @@ NovationLaunchpadS = {
 	// gator
 	//
 
-	process_gator: function(group) {
+	process_gator: function(group, action) {
 		var self = NovationLaunchpadS;
 		self.gator_direction = !self.gator_direction;
-		engine.setValue(group, 'filterHighKill', self.gator_direction ? 1 : 0);
+		engine.setValue(group, action, self.gator_direction ? 1 : 0);
 	},
 
 	//
@@ -695,11 +702,26 @@ NovationLaunchpadS = {
 
 		for (var btn=0; btn<nbtns; btn++) {
 			this.capture((y-btn)+","+x, "press", page, function(g, name, value) {
-				var cap = name.match(/^(\d+),\d+/); // value not closed
-				var num = y - cap[1];
-				engine.setValue(group, action, incr * num);
+				if (
+					(this.vumeter_shift > 0)
+					&& (!((x==3) || (x==4)))
+				) {
+					engine.setValue(group, action+"Kill", 0);
+				} else {
+					var cap = name.match(/^(\d+),\d+/); // value not closed
+					var num = y - cap[1];
+					engine.setValue(group, action, incr * num);
+				}
 			});
 			this.send((y-btn)+","+x, this.colors[on_color], page);
+			this.capture((y-btn)+","+x, "release", page, function(g, name, value) {
+				if (
+					(this.vumeter_shift > 0)
+					&& (!((x==3) || (x==4)))
+				) {
+					engine.setValue(group, action+"Kill", 1);
+				}
+			});
 		}
 
 		// mixxx => launchpad
