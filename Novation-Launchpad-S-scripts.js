@@ -45,6 +45,7 @@ NovationLaunchpadS = {
 		this.get = self.get;
 		this.loop = self.loop;
 		this.gator = self.gator;
+		this.holddownkill = self.holddownkill;
 		this.set_page = self.set_page;
 		this.vfader = self.vfader;
 		this.vumeter = self.vumeter;
@@ -257,14 +258,14 @@ NovationLaunchpadS = {
 
 		//// MIXER PAGE ////
 
-		// gator effect
+		// hold down to kill effect
 
-		this.gator( "1,0", 2, "[Channel"+this.deckone+"]", "filterLowKill" , 4, 0.7);
-		this.gator( "1,1", 2, "[Channel"+this.deckone+"]", "filterMidKill" , 4, 0.7);
-		this.gator( "1,2", 2, "[Channel"+this.deckone+"]", "filterHighKill", 4, 0.7);
-		this.gator( "1,5", 2, "[Channel"+this.decktwo+"]", "filterLowKill" , 4, 0.7);
-		this.gator( "1,6", 2, "[Channel"+this.decktwo+"]", "filterMidKill" , 4, 0.7);
-		this.gator( "1,7", 2, "[Channel"+this.decktwo+"]", "filterHighKill", 4, 0.7);
+		this.button( "1,0", "all", 2, 'hi_red', 'black', "[Channel"+this.deckone+"]", "filterLowKill" );
+		this.button( "1,1", "all", 2, 'hi_red', 'black', "[Channel"+this.deckone+"]", "filterMidKill" );
+		this.button( "1,2", "all", 2, 'hi_red', 'black', "[Channel"+this.deckone+"]", "filterHighKill");
+		this.button( "1,5", "all", 2, 'hi_red', 'black', "[Channel"+this.decktwo+"]", "filterLowKill" );
+		this.button( "1,6", "all", 2, 'hi_red', 'black', "[Channel"+this.decktwo+"]", "filterMidKill" );
+		this.button( "1,7", "all", 2, 'hi_red', 'black', "[Channel"+this.decktwo+"]", "filterHighKill");
 
 		this.toggle("2,0", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+this.deckone+"]", "filterLowKill");
 		this.toggle("2,1", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+this.deckone+"]", "filterMidKill");
@@ -403,6 +404,26 @@ NovationLaunchpadS = {
 				}
 			}
 		}
+	},
+
+	// holddownkill
+
+	holddownkill: function(name, page, group, action, rate, depth) {
+		this.button(name, "all", page, 'hi_red', 'black', group, "", function(g, n, v) {
+			var self = NovationLaunchpadS;
+			if (v > 0) {
+				//if ((bpm = engine.getValue(g, 'bpm')) > 0) {
+					this.button("2,0", "all", 2, 'flash_hi_red', 'lo_red', "[Channel"+this.deckone+"]", "filterLowKill");
+					var interval = self.msperbeat()/rate;
+					self.gator_direction = false;
+					self.gator_depth = depth;
+					self.gator_timer = engine.beginTimer(interval, 'NovationLaunchpadS.process_gator("' + g + '","'+action+'")');
+				//}
+			}
+			else {
+				engine.setValue(group, action, 0);
+			}
+		});
 	},
 
 	//
